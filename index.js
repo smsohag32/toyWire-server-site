@@ -36,15 +36,34 @@ async function run() {
     // await client.connect();
    
     const offerCollection = client.db('toyWireDB').collection('offers');
-
+    const toysCollection = client.db('toyWireDB').collection('toys')
     app.get('/offers', async(req, res)=>{
         
         const offersData = await offerCollection.find().toArray()
         res.send(offersData)
     })
     
-    
-    
+    // category wise get data
+    app.get('/toys/:category', async(req, res) => {
+    const category = req.params.category;
+    let query = {};
+    if (category === 'Plush' || category === 'Musical' || category === 'Storytelling' || category === 'Vehicle') {
+      query = {subCategory: req.params.category}
+    } else {
+      query = {};
+    }
+    const toys = await toysCollection.find(query).toArray();
+    console.log('hitting');
+    res.send(toys);
+  });
+
+  // toys post in mongodb 
+  app.post('/toys', async(req, res)=>{
+    const body = req.body;
+    const result = await toysCollection.insertOne(body);
+    res.send(result);
+  })
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
