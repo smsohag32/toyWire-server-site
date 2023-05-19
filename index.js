@@ -42,6 +42,11 @@ async function run() {
         const offersData = await offerCollection.find().toArray()
         res.send(offersData)
     })
+    // all toys get
+    app.get('/toys', async(req,res)=> {
+      const allToys = await toysCollection.find().toArray();
+      res.send(allToys)
+    })
     
     // category wise get data
     app.get('/toys/:category', async(req, res) => {
