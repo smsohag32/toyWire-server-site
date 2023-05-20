@@ -78,6 +78,7 @@ async function run() {
 
     app.get('/toy/:id', async(req, res)=> {
       const id = req.params.id;
+      console.log(id);
       const query = {_id: new ObjectId(id)};
       const result = await toysCollection.findOne(query);
       res.send(result);
@@ -92,6 +93,16 @@ async function run() {
     res.send(result);
   });
 
+  //  some trending toy get
+
+  app.get('/popular', async(req,res) =>{
+    const option = {
+      projection: {img: 1}
+    }
+    const result = await toysCollection.find(option).limit(10).toArray();
+    res.send(result);
+  })
+
   app.get('/trending', async(req, res) => {
     const result = await toysCollection.find().limit(5).toArray();
     res.send(result);
@@ -102,18 +113,20 @@ async function run() {
     const result = await toysCollection.insertOne(body);
     res.send(result);
   })
-  // toy information update
 
+  // toy information update
   app.put('/toy/:id', async(req,res)=> {
     const id = req.params.id;
+    console.log(id);
     const toy = req.body;
+    console.log(toy);
     const filter = {_id: new ObjectId(id)}
     const option = {upsert: false};
     const updatedToy = {
       $set: {
-        price: toy.price,
-        quantity: toy.quantity,
-        description: toy.description,
+        price: toy.upPrice,
+        quantity: toy.upQuantity,
+        description: toy.upDescription,
       }
     }
     const result = await toysCollection.updateOne(filter, updatedToy, option);
