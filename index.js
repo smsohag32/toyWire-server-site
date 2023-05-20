@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
@@ -37,6 +37,22 @@ async function run() {
    
     const offerCollection = client.db('toyWireDB').collection('offers');
     const toysCollection = client.db('toyWireDB').collection('toys')
+
+    // indexing 
+    const indexKey = {toyName: 1}
+    const indexOption = {toy: "toyNameSearch"}
+
+
+    const result = await toysCollection.createIndex(indexKey, indexOption)
+
+    app.get('/toys-search/:name', async(req, res)=> {
+      const searchToyName = req.params.name;
+      const result = await toysCollection.find({
+        toyName: { $regex: searchToyName, $options: 'i'}
+      }).toArray();
+      res.send(result)
+    })
+
     app.get('/offers', async(req, res)=>{
         
         const offersData = await offerCollection.find().toArray()
@@ -47,25 +63,68 @@ async function run() {
       const allToys = await toysCollection.find().toArray();
       res.send(allToys)
     })
-    
+    // get user toys
+    app.get('/toys', async(req,res)=>{
+      const sellerEmail = req.query.email;
+      let query = {};
+      if(sellerEmail){
+        query = {email: sellerEmail}
+      }
+      const result = await toysCollection.find(query).toArray();
+      res.send(result)
+
+    })
+    // single toy get
+
+    app.get('/toy/:id', async(req, res)=> {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    })
     // category wise get data
-    app.get('/toys/:category', async(req, res) => {
-    const category = req.params.category;
-    let query = {};
-    if (category === 'Plush' || category === 'Musical' || category === 'Storytelling' || category === 'Vehicle') {
-      query = {subCategory: req.params.category}
-    } else {
-      query = {};
+    app.get('/subCategory', async(req, res) => {
+    let query = {}
+    if(req.query?.category){
+      query = {subCategory: req.query.category}
     }
-    const toys = await toysCollection.find(query).toArray();
-    console.log('hitting');
-    res.send(toys);
+    const result = await toysCollection.find(query).toArray();
+    res.send(result);
   });
 
+  app.get('/trending', async(req, res) => {
+    const result = await toysCollection.find().limit(5).toArray();
+    res.send(result);
+  })
   // toys post in mongodb 
   app.post('/toys', async(req, res)=>{
     const body = req.body;
     const result = await toysCollection.insertOne(body);
+    res.send(result);
+  })
+  // toy information update
+
+  app.put('/toy/:id', async(req,res)=> {
+    const id = req.params.id;
+    const toy = req.body;
+    const filter = {_id: new ObjectId(id)}
+    const option = {upsert: false};
+    const updatedToy = {
+      $set: {
+        price: toy.price,
+        quantity: toy.quantity,
+        description: toy.description,
+      }
+    }
+    const result = await toysCollection.updateOne(filter, updatedToy, option);
+    res.send(result);
+  })
+
+  // toy delete 
+  app.delete('/toy/:id', async(req, res)=>  {
+    const id = req.params.id;
+    const query = {_id: new ObjectId(id)};
+    const result = await toysCollection.deleteOne(query);
     res.send(result);
   })
 
