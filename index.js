@@ -3,13 +3,11 @@ const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const dotenv = require('dotenv');
-
 const port = process.env.PORT || 3000
 
 dotenv.config();
 
 // middleware
-
 app.use(cors());
 app.use(express.json());
 
@@ -17,6 +15,7 @@ app.use(express.json());
 app.get('/', (req,res)=>{
     res.send('toyWire server is running!')
 })
+
 // mongo db uri
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.d2ul6pd.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -36,15 +35,15 @@ async function run() {
     // await client.connect();
    
     const offerCollection = client.db('toyWireDB').collection('offers');
-    const toysCollection = client.db('toyWireDB').collection('toys')
-
+    const toysCollection = client.db('toyWireDB').collection('toys');
+    const blogCollection = client.db('toyWireDB').collection('blogs');
     // indexing 
     const indexKey = {toyName: 1}
     const indexOption = {toy: "toyNameSearch"}
 
-
     const result = await toysCollection.createIndex(indexKey, indexOption)
 
+    // searching
     app.get('/toys-search/:name', async(req, res)=> {
       const searchToyName = req.params.name;
       const result = await toysCollection.find({
@@ -52,17 +51,38 @@ async function run() {
       }).toArray();
       res.send(result)
     })
+    // shorting
+    app.get('/sorted', async(req, res)=>{
 
-    app.get('/offers', async(req, res)=>{
-        
-        const offersData = await offerCollection.find().toArray()
-        res.send(offersData)
+      let shortQuery = {};
+      const userEmail = req.query.email;
+      const userQuery = {email: userEmail};
+      const filter = parseInt(req.query.filter);
+      if(filter){
+        shortQuery = {price: filter}
+      }
+      const result = await toysCollection.find(userQuery).sort(shortQuery).toArray();
+      res.send(result);
     })
+
+    // get blogs data
+    app.get('/blogs', async(req, res)=> {
+      const result = await blogCollection.find().toArray();
+      res.send(result);
+    })
+    // get offer data
+    app.get('/offers', async(req, res)=>{
+        const offersData = await offerCollection.find().toArray();
+        res.send(offersData);
+    })
+    
+
     // all toys get
     app.get('/toys', async(req,res)=> {
       const allToys = await toysCollection.find().toArray();
-      res.send(allToys)
+      res.send(allToys);
     })
+
     // get user toys
     app.get('/toys', async(req,res)=>{
       const sellerEmail = req.query.email;
@@ -74,8 +94,8 @@ async function run() {
       res.send(result)
 
     })
-    // single toy get
 
+    // single toy get
     app.get('/toy/:id', async(req, res)=> {
       const id = req.params.id;
       console.log(id);
@@ -83,6 +103,7 @@ async function run() {
       const result = await toysCollection.findOne(query);
       res.send(result);
     })
+
     // category wise get data
     app.get('/subCategory', async(req, res) => {
     let query = {}
@@ -94,19 +115,21 @@ async function run() {
   });
 
   //  some trending toy get
-
   app.get('/popular', async(req,res) =>{
     const option = {
       projection: {img: 1}
     }
-    const result = await toysCollection.find(option).limit(10).toArray();
+    const query = {};
+    const result = await toysCollection.find(query, option).limit(10).toArray();
     res.send(result);
   })
 
+  // get trending toys
   app.get('/trending', async(req, res) => {
-    const result = await toysCollection.find().limit(5).toArray();
+    const result = await toysCollection.find().limit(7).toArray();
     res.send(result);
   })
+
   // toys post in mongodb 
   app.post('/toys', async(req, res)=>{
     const body = req.body;
@@ -140,6 +163,7 @@ async function run() {
     const result = await toysCollection.deleteOne(query);
     res.send(result);
   })
+
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
