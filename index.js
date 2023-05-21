@@ -28,10 +28,9 @@ const client = new MongoClient(uri, {
 app.get('/', (req,res)=>{
     res.send('toyWire server is running!')
 })
-
 async function run() {
   try {
-   
+  
    await client.connect();
    
     const offerCollection = client.db('toyWireDB').collection('offers');
@@ -98,7 +97,6 @@ async function run() {
     // single toy get
     app.get('/toys/:id', async(req, res)=> {
       const id = req.params.id;
-      console.log(id);
       const query = {_id: new ObjectId(id)};
       const result = await toysCollection.findOne(query);
       res.send(result);
@@ -164,10 +162,10 @@ async function run() {
 
 
     await client.db("admin").command({ ping: 1 });
-    console.log("connected to MongoDB!");
   } finally {
       
 }
+
 }
 run().catch(console.dir);
 
