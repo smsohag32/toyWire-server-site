@@ -32,7 +32,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
    
-    // await client.connect();
+    client.connect();
    
     const offerCollection = client.db('toyWireDB').collection('offers');
     const toysCollection = client.db('toyWireDB').collection('toys');
