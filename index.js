@@ -11,10 +11,6 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 
-// initial server route
-app.get('/', (req,res)=>{
-    res.send('toyWire server is running!')
-})
 
 // mongo db uri
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.d2ul6pd.mongodb.net/?retryWrites=true&w=majority`;
@@ -28,6 +24,10 @@ const client = new MongoClient(uri, {
   }
 });
 
+// initial server route
+app.get('/', (req,res)=>{
+    res.send('toyWire server is running!')
+})
 
 async function run() {
   try {
@@ -64,20 +64,7 @@ async function run() {
       const result = await toysCollection.find(userQuery).sort(shortQuery).toArray();
       res.send(result);
     })
-   
-    // pagination data get 
-    app.get('/all-toys', async(req,res)=> {
-      const page = parseInt(req.query.page);
-      const limit = parseInt(req,express.query.limit);
-      const skip = page * limit;
-    })
-
-    // total data 
-    app.get('/total-toys', async(req, res)=> {
-      const result = await toysCollection.estimatedDocumentCount();
-      res.send({totalToy: result})
-    })
-
+    
     // get blogs data
     app.get('/blogs', async(req, res)=> {
       const result = await blogCollection.find().toArray();
