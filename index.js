@@ -65,6 +65,19 @@ async function run() {
       res.send(result);
     })
 
+    // pagination data get 
+    app.get('/all-toys', async(req,res)=> {
+      const page = parseInt(req.query.page);
+      const limit = parseInt(req,express.query.limit);
+      const skip = page * limit;
+    })
+
+    // total data 
+    app.get('/total-toys', async(req, res)=> {
+      const result = await toysCollection.estimatedDocumentCount();
+      res.send({totalToy: result})
+    })
+
     // get blogs data
     app.get('/blogs', async(req, res)=> {
       const result = await blogCollection.find().toArray();
@@ -166,7 +179,7 @@ async function run() {
 
 
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log("connected to MongoDB!");
   } finally {
       
 }
