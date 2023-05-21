@@ -64,7 +64,7 @@ async function run() {
       const result = await toysCollection.find(userQuery).sort(shortQuery).toArray();
       res.send(result);
     })
-
+   
     // pagination data get 
     app.get('/all-toys', async(req,res)=> {
       const page = parseInt(req.query.page);
@@ -92,12 +92,12 @@ async function run() {
 
     // all toys get
     app.get('/toys', async(req,res)=> {
-      const allToys = await toysCollection.find().toArray();
+      const allToys = await toysCollection.find().limit(20).toArray();
       res.send(allToys);
     })
 
     // get user toys
-    app.get('/toys', async(req,res)=>{
+    app.get('/my-toys', async(req,res)=>{
       const sellerEmail = req.query.email;
       let query = {};
       if(sellerEmail){
@@ -109,7 +109,7 @@ async function run() {
     })
 
     // single toy get
-    app.get('/toy/:id', async(req, res)=> {
+    app.get('/toys/:id', async(req, res)=> {
       const id = req.params.id;
       console.log(id);
       const query = {_id: new ObjectId(id)};
@@ -153,7 +153,6 @@ async function run() {
   // toy information update
   app.put('/toy/:id', async(req,res)=> {
     const id = req.params.id;
-    console.log(id);
     const toy = req.body;
     console.log(toy);
     const filter = {_id: new ObjectId(id)}
