@@ -32,7 +32,7 @@ app.get('/', (req,res)=>{
 async function run() {
   try {
    
-    client.connect();
+   await client.connect();
    
     const offerCollection = client.db('toyWireDB').collection('offers');
     const toysCollection = client.db('toyWireDB').collection('toys');
@@ -141,7 +141,6 @@ async function run() {
   app.put('/toy/:id', async(req,res)=> {
     const id = req.params.id;
     const toy = req.body;
-    console.log(toy);
     const filter = {_id: new ObjectId(id)}
     const option = {upsert: false};
     const updatedToy = {
