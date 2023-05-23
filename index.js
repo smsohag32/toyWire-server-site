@@ -1,11 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const cors = require('cors');
 const dotenv = require('dotenv');
 const port = process.env.PORT || 3000
-
 dotenv.config();
+
+
 
 // middleware
 app.use(cors());
@@ -26,21 +27,34 @@ const client = new MongoClient(uri, {
 
 // initial server route
 app.get('/', (req,res)=>{
-    res.send('toyWire server is running!')
+  res.send('toyWire server is running!')
 })
+
+
 async function run() {
-  try {
   
+  
+  
+  try {
+    
+    
     client.connect();
-   
-    const offerCollection = client.db('toyWireDB').collection('offers');
+    
     const toysCollection = client.db('toyWireDB').collection('toys');
     const blogCollection = client.db('toyWireDB').collection('blogs');
+    const offerCollection = client.db('toyWireDB').collection('offers');
+    
     // indexing 
     const indexKey = {toyName: 1}
     const indexOption = {toy: "toyNameSearch"}
-
+    
     const result = await toysCollection.createIndex(indexKey, indexOption)
+    
+    // all toys get
+    app.get('/toys', async(req,res)=> {
+      const allToys = await toysCollection.find().limit(20).toArray();
+      res.send(allToys);
+    })
 
     // searching
     app.get('/toys-search/:name', async(req, res)=> {
@@ -52,7 +66,7 @@ async function run() {
     })
     // shorting
     app.get('/sorted', async(req, res)=>{
-
+      
       let shortQuery = {};
       const userEmail = req.query.email;
       const userQuery = {email: userEmail};
@@ -75,13 +89,8 @@ async function run() {
         res.send(offersData);
     })
     
-
-    // all toys get
-    app.get('/toys', async(req,res)=> {
-      const allToys = await toysCollection.find().limit(20).toArray();
-      res.send(allToys);
-    })
-
+    
+    
     // get user toys
     app.get('/my-toys', async(req,res)=>{
       const sellerEmail = req.query.email;
@@ -170,7 +179,7 @@ async function run() {
 run().catch(console.dir);
 
 app.listen(port, ()=>{
-  console.log(`server is running `);
+  console.log('server running');
 })
 
 
