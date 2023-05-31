@@ -9,8 +9,13 @@ dotenv.config();
 
 
 // middleware
-app.use(cors());
-app.use(express.json());
+const corsOptions = {
+  origin: '*',
+  credentials: true,
+  optionSuccessStatus: 200,
+}
+app.use(cors(corsOptions))
+app.use(express.json())
 
 
 // mongo db uri
@@ -25,20 +30,12 @@ const client = new MongoClient(uri, {
   }
 });
 
-// initial server route
-app.get('/', (req,res)=>{
-  res.send('toyWire server is running!')
-})
-
 
 async function run() {
   
   
   
   try {
-    
-    
-    client.connect();
     
     const toysCollection = client.db('toyWireDB').collection('toys');
     const blogCollection = client.db('toyWireDB').collection('blogs');
@@ -133,7 +130,7 @@ async function run() {
 
   // get trending toys
   app.get('/trending', async(req, res) => {
-    const result = await toysCollection.find().limit(7).toArray();
+    const result = await toysCollection.find().limit(9).toArray();
     res.send(result);
   })
 
@@ -177,6 +174,12 @@ async function run() {
 
 }
 run().catch(console.dir);
+
+// initial server route
+app.get('/', (req,res)=>{
+  res.send('toyWire server is running!')
+})
+
 
 app.listen(port, ()=>{
   console.log('server running');
