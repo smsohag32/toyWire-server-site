@@ -2,4 +2,4 @@
 
 ## Live Link : [ToyWire](https://toywire-8b703.web.app/)
 
-## Server site Like: [ToyWire Server](https://toy-wire-server.vercel.app/)
+## Server site Like: [ToyWire Server](https://toy-wire-server.vercel.app/toys/)
