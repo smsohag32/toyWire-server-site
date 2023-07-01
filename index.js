@@ -36,16 +36,12 @@ async function run() {
   
   
   try {
-    
+ 
     const offerCollection = client.db('toyWireDB').collection('offers');
     const blogCollection = client.db('toyWireDB').collection('blogs');
     const toyCollection = client.db('toyWireDB').collection('toys');
     
-    // indexing 
-    const indexKey = {toyName: 1}
-    const indexOption = {toy: "toyNameSearch"}
-    
-    const result = await toyCollection.createIndex(indexKey, indexOption)
+   
     
     // all toys get
     app.get('/toys', async(req,res)=> {
@@ -58,7 +54,7 @@ async function run() {
       projection: {img: 1}
     }
     const query = {};
-    const result = await toyCollection.find(query, option).limit(10).toArray();
+    const result = await toyCollection.find(query, option).limit(16).toArray();
     res.send(result);
   })
 
@@ -71,6 +67,12 @@ async function run() {
 
     // searching
     app.get('/toyssearch/:name', async(req, res)=> {
+       // indexing 
+    const indexKey = {toyName: 1}
+    const indexOption = {toy: "toyNameSearch"}
+    
+    const indexResult = await toyCollection.createIndex(indexKey, indexOption)
+    
       const searchToyName = req.params.name;
       const result = await toyCollection.find({
         toyName: { $regex: searchToyName, $options: 'i'}
